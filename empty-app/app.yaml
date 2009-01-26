@@ -1,0 +1,14 @@
+#
+# This is really a template since the app engine requires
+# you to have a previously approved application id and a version
+#  This descriptor may need to be changed on the fly
+#
+application: empty 
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /.*
+  script: empty_message.py
+
