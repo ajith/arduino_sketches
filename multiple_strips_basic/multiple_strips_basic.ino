@@ -1,3 +1,36 @@
+/*
+This sketch contains the well known and widely used NeoPixels styles, adopted to 
+multiple strips on different output pins. The requirement, priarily, is to run multiple
+strips synchronized with mostly the same pattern.
+
+The original functions have either been taken from the Arduino example sketches and modified 
+for the multilple strips usecase or taken from other opensource works (which are acked on the commends
+in the relevant funtions.
+
+This work itself is released under MIT License
+
+-----------------------------------------------------------------------------
+The MIT License (MIT)
+
+Copyright (c) 2018 
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 #include <Adafruit_NeoPixel.h>
 
 #define STRIP_COUNT 2
@@ -5,7 +38,9 @@
 #define PIXELS 30
 
 int PIN[] = {5,6};
-Adafruit_NeoPixel strip[] = { Adafruit_NeoPixel(PIXELS, PIN[0], NEO_GRB + NEO_KHZ800), Adafruit_NeoPixel(PIXELS, PIN[1], NEO_GRB + NEO_KHZ800)};
+Adafruit_NeoPixel strip[] = { 
+    Adafruit_NeoPixel(PIXELS, PIN[0], NEO_GRB + NEO_KHZ800), 
+    Adafruit_NeoPixel(PIXELS, PIN[1], NEO_GRB + NEO_KHZ800)};
 
 void setup() {
    for (int count=0;count < STRIP_COUNT;count++) {
@@ -20,22 +55,26 @@ void loop() {
   // The lower the speed, the faster the lights will become.
   // #Color is a static method so it is fine to take it off the first
   // strip
-  multiColorWipe(strip[0].Color(255, 0, 0), speed); // Red
-  multiColorWipe(strip[0].Color(0, 255, 0), speed); // Green
-  multiColorWipe(strip[0].Color(0, 0, 255), speed); // Blue
-  
-  multiTheaterChase(strip[0].Color(0, 255, 0), speed); //Green
-  multiTheaterChase(strip[0].Color(100, 100, 0), speed); //red + green
+//  multiColorWipe(strip[0].Color(255, 0, 0), speed); // Red
+//  multiColorWipe(strip[0].Color(0, 255, 0), speed); // Green
+//  multiColorWipe(strip[0].Color(0, 0, 255), speed); // Blue
+//  
+//  multiTheaterChase(strip[0].Color(0, 255, 0), speed); //Green
+//  multiTheaterChase(strip[0].Color(100, 100, 0), speed); //red + green
+//
+//  multiRainbowTheaterChase(speed);
+//  
+  for(int position = 0; position < 255; position = position + 20){
+    knightRider(1, 9 , 10, Wheel(position));
+  }
 
-  multiRainbowTheaterChase(speed);
-  
 }
 
 // Fill the dots one after the other with a color
 void multiColorWipe(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i < PIXELS; i++) {
     for (int count=0;count < STRIP_COUNT;count++) {
-     strip[count].setPixelColor(i, c);
+     strip[count].setPixelColor(i, c);                         
    }
    showEffect(wait);
   }
@@ -106,3 +145,54 @@ uint32_t Wheel(byte WheelPos) {
   }
 }
 
+// The following function is inspired from the knightrider sketch in 
+// https://github.com/technobly/NeoPixel-KnightRider/blob/master/NeoPixel_KnightRider.ino
+// It has been modified to use multiple strips in parallel
+//
+// Cycles - one cycle is scanning through all pixels left then right (or right then left)
+// Speed - how fast one cycle is (32 with 16 pixels is default KnightRider speed)
+// Width - how wide the trail effect is on the fading out LEDs.  The original display used
+//         light bulbs, so they have a persistance when turning off.  This creates a trail.
+//         Effective range is 2 - 8, 4 is default for 16 pixels.  Play with this.
+// Color - 32-bit packed RGB color value.  All pixels will be this color.
+// knightRider(cycles, speed, width, color);
+void knightRider(uint16_t cycles, uint16_t speed, uint8_t width, uint32_t color) {
+  uint32_t old_val[PIXELS]; // up to 256 lights!
+  for(int i = 0; i < cycles; i++){
+    //forward
+    for (int count = 1; count< PIXELS; count++) {
+          for (int scount=0; scount < STRIP_COUNT;scount++) {
+           strip[scount].setPixelColor(count, color);                         
+           old_val[count] = color;
+           for(int x = count; x>0; x--) {
+             old_val[x-1] = dimColor(old_val[x-1], width);
+             strip[scount].setPixelColor(x-1, old_val[x-1]); 
+           }
+          }
+      showEffect(speed);
+    }
+    //reverse
+    for (int count = PIXELS - 1; count>=0; count--) {
+      for (int scount=0; scount < STRIP_COUNT;scount++) {
+       strip[scount].setPixelColor(count, color);
+       old_val[count] = color;
+       for(int x = count; x<= PIXELS ;x++) {
+         old_val[x-1] = dimColor(old_val[x-1], width);
+         strip[scount].setPixelColor(x+1, old_val[x+1]);
+       }
+      }
+     showEffect(speed);
+    }
+  }
+}
+
+// Dims the color in proportion of the width.
+// The dimness is calculated by dividing the the RGB components
+// by the width and doing a masking with that color space.
+// Example
+// red  color&0xFF0000 <- extracts the red component
+//     dividing that by width reduces it to a 20th in brightness
+//     masking with the original color space FF0000 gives the values for the original component, if anything has overflowed
+uint32_t dimColor(uint32_t color, uint8_t width) {
+   return (((color&0xFF0000)/width)&0xFF0000) + (((color&0x00FF00)/width)&0x00FF00) + (((color&0x0000FF)/width)&0x0000FF);
+}

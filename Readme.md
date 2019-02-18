@@ -29,4 +29,4 @@ void showEffect(uint8_t wait){
 ```
 Note the use the strip arrays and the actions on each array.
 
-See the multiple_strips_basic sketch for a working example on this
+See the multiple_strips_basic sketch for a working example on this.
