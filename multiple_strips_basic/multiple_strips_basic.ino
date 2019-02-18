@@ -1,10 +1,10 @@
 /*
 This sketch contains the well known and widely used NeoPixels styles, adopted to 
-multiple strips on different output pins. The requirement, priarily, is to run multiple
+multiple strips on different output pins. The requirement, primarily, is to run multiple
 strips synchronized with mostly the same pattern.
 
 The original functions have either been taken from the Arduino example sketches and modified 
-for the multilple strips usecase or taken from other opensource works (which are acked on the commends
+for the multilple strips usecase or taken from other open source works (which are acked on the comments
 in the relevant funtions.
 
 This work itself is released under MIT License
@@ -12,7 +12,7 @@ This work itself is released under MIT License
 -----------------------------------------------------------------------------
 The MIT License (MIT)
 
-Copyright (c) 2018 
+Copyright (c) 2018 Ajith Ranabahu ajith.ranabahu@gmail.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -55,15 +55,15 @@ void loop() {
   // The lower the speed, the faster the lights will become.
   // #Color is a static method so it is fine to take it off the first
   // strip
-//  multiColorWipe(strip[0].Color(255, 0, 0), speed); // Red
-//  multiColorWipe(strip[0].Color(0, 255, 0), speed); // Green
-//  multiColorWipe(strip[0].Color(0, 0, 255), speed); // Blue
-//  
-//  multiTheaterChase(strip[0].Color(0, 255, 0), speed); //Green
-//  multiTheaterChase(strip[0].Color(100, 100, 0), speed); //red + green
-//
-//  multiRainbowTheaterChase(speed);
-//  
+  multiColorWipe(strip[0].Color(255, 0, 0), speed); // Red
+  multiColorWipe(strip[0].Color(0, 255, 0), speed); // Green
+  multiColorWipe(strip[0].Color(0, 0, 255), speed); // Blue
+  
+  multiTheaterChase(strip[0].Color(0, 255, 0), speed); //Green
+  multiTheaterChase(strip[0].Color(100, 100, 0), speed); //red + green
+
+  multiRainbowTheaterChase(speed);
+  
   for(int position = 0; position < 255; position = position + 20){
     knightRider(1, 9 , 10, Wheel(position));
   }
