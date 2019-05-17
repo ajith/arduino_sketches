@@ -33,14 +33,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #include <Adafruit_NeoPixel.h>
 
-#define STRIP_COUNT 2
+#define STRIP_COUNT 6
 // common number of pixels - this is meant to control pixels 
-#define PIXELS 30
+#define PIXELS 14
+// on ATMega328 based Arduinos these are all the PWM pins
+// Note that if you change this, the STRIP_COUNT has be changed as well
+int PIN[] = {3,5,6,9,10,11};
 
-int PIN[] = {5,6};
 Adafruit_NeoPixel strip[] = { 
     Adafruit_NeoPixel(PIXELS, PIN[0], NEO_GRB + NEO_KHZ800), 
-    Adafruit_NeoPixel(PIXELS, PIN[1], NEO_GRB + NEO_KHZ800)};
+    Adafruit_NeoPixel(PIXELS, PIN[1], NEO_GRB + NEO_KHZ800),
+    Adafruit_NeoPixel(PIXELS, PIN[2], NEO_GRB + NEO_KHZ800), 
+    Adafruit_NeoPixel(PIXELS, PIN[3], NEO_GRB + NEO_KHZ800), 
+    Adafruit_NeoPixel(PIXELS, PIN[4], NEO_GRB + NEO_KHZ800), 
+    Adafruit_NeoPixel(PIXELS, PIN[5], NEO_GRB + NEO_KHZ800)
+  };
 
 void setup() {
    for (int count=0;count < STRIP_COUNT;count++) {
@@ -50,7 +57,7 @@ void setup() {
 }
 
 void loop() {
-  uint8_t speed = 50; // This is the global speed factor.
+  uint8_t speed = 40; // This is the global speed factor.
 
   // The lower the speed, the faster the lights will become.
   // #Color is a static method so it is fine to take it off the first
@@ -58,14 +65,15 @@ void loop() {
   multiColorWipe(strip[0].Color(255, 0, 0), speed); // Red
   multiColorWipe(strip[0].Color(0, 255, 0), speed); // Green
   multiColorWipe(strip[0].Color(0, 0, 255), speed); // Blue
-  
-  multiTheaterChase(strip[0].Color(0, 255, 0), speed); //Green
-  multiTheaterChase(strip[0].Color(100, 100, 0), speed); //red + green
 
-  multiRainbowTheaterChase(speed);
+ 
+  for(int chase_size = 10; chase_size > 3; chase_size = chase_size -1){
+    multiLargeBlockChase(strip[0].Color(0, 255, 0), chase_size, speed);
+   }
+   multiRainbowTheaterChase(speed);
   
-  for(int position = 0; position < 255; position = position + 20){
-    knightRider(1, 9 , 10, Wheel(position));
+  for(int position = 0; position < 255; position = position + 40){
+    knightRider(1, 4 , 2, Wheel(position));
   }
 
 }
@@ -91,18 +99,24 @@ void showEffect(uint8_t wait){
 
 // Theatre-style crawling lights for multiple strips
 void multiTheaterChase(uint32_t c, uint8_t wait) {
+  multiLargeBlockChase(c,3, wait);
+}
+
+// Chase like behavior with large blocks of colors - basically 
+// a version of theater chase but with a cutomizable width
+void multiLargeBlockChase(uint32_t c, uint8_t width, uint8_t wait) {
   for (int j=0; j < 10; j++) {  //do 10 cycles of chasing
-    for (int q=0; q < 3; q++) {
-      for (int i=0; i < PIXELS; i=i+3) {
+    for (int q=0; q < width; q++) {
+      for (int i=0; i < PIXELS; i = i + width) {
          for (int count=0;count < STRIP_COUNT;count++) {
-           strip[count].setPixelColor(i+q, c); //turn every third pixel on
+           strip[count].setPixelColor(i+q, c);
          }
        }
        showEffect(wait);
      
-      for (int i=0; i < PIXELS; i=i+3) {
+      for (int i=0; i < PIXELS; i = i + width) {
         for (int count=0;count < STRIP_COUNT;count++) {
-           strip[count].setPixelColor(i+q, 0); //turn every third pixel off
+           strip[count].setPixelColor(i+q, 0); 
          }
       }
     }
@@ -130,6 +144,7 @@ void multiRainbowTheaterChase(uint8_t wait) {
     }
   }
 }
+
 
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
