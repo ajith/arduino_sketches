@@ -92,14 +92,14 @@ void starRainbowChasing(uint8_t wait, bool centerOnly) {
         positionIndicator = ((i / 5) % 3);
         plusPositionIndicator = (((i + q) / 5) % 3);
         if (centerOnly) {
-          if (positionIndicator == 1 || plusPositionIndicator ==1) {
+          if (positionIndicator == 1 || plusPositionIndicator == 1) {
             strip.setPixelColor(i + q, Wheel( (i + j) % 255));
           } else {
             strip.setPixelColor(i, 0); //off the others
           }
         } else {
-          if (positionIndicator != 1 || plusPositionIndicator !=1) {
-           strip.setPixelColor(i + q, Wheel( (i + j) % 255));
+          if (positionIndicator != 1 || plusPositionIndicator != 1) {
+            strip.setPixelColor(i + q, Wheel( (i + j) % 255));
           } else {
             strip.setPixelColor(i, 0); //off the others
           }
